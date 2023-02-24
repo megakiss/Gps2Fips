@@ -48,34 +48,13 @@ class GeoGsonCode(jsonString: String) {
         val jsonFeatures = jsonObject.getAsJsonArray("features")
         jsonFeatures.forEach { jsonFeature ->
             val jsonProperties = jsonFeature.asJsonObject.getAsJsonObject("properties")
-            var name = try {
-                jsonProperties.get("NAME").asString
-            } catch (e: Exception) {
-                ""
-            }
-            if (name.isEmpty()) {
-                name = try {
-                    jsonProperties.get("SIG_KOR_NM").asString
-                } catch (e: Exception) {
-                    "NO NAME"
-                }
-            }
-
-            //Log.i(TAG, "name:$name")
-
-            var geoID = try {
-                jsonProperties.get("GEOID").asInt
-            } catch (e: Exception) {
-                0
-            }
-            if (geoID == 0) {
-                geoID = try {
-                    jsonProperties.get("SIG_CD").asInt
-                } catch (e: Exception) {
-                    0
-                }
-            }
-            //Log.i(TAG, "geoID:$geoID")
+            var name = "NO NAME"
+            jsonProperties.get("NAME")?.let {name = it.asString}
+            jsonProperties.get("SIG_KOR_NM")?.let {name = it.asString}
+            var geoID = 0
+            jsonProperties.get("GEOID")?.let {geoID = it.asInt}
+            jsonProperties.get("SIG_CD")?.let {geoID = it.asInt}
+            //Log.i(TAG, "name:$name geoID:$geoID")
 
             val jsonGeometry = jsonFeature.asJsonObject.getAsJsonObject("geometry")
             val jsonCoordinates = jsonGeometry.getAsJsonArray("coordinates")
