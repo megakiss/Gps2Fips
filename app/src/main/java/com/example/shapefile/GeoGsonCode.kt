@@ -5,7 +5,7 @@ import android.util.Log
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 
-class UsaFips(jsonString: String) {
+class GeoGsonCode(jsonString: String) {
     data class Feature(
         val name: String,
         val geoId: Int,
@@ -48,8 +48,35 @@ class UsaFips(jsonString: String) {
         val jsonFeatures = jsonObject.getAsJsonArray("features")
         jsonFeatures.forEach { jsonFeature ->
             val jsonProperties = jsonFeature.asJsonObject.getAsJsonObject("properties")
-            val name = jsonProperties.get("NAME").asString
-            val geoID = jsonProperties.get("GEOID").asInt
+            var name = try {
+                jsonProperties.get("NAME").asString
+            } catch (e: Exception) {
+                ""
+            }
+            if (name.isEmpty()) {
+                name = try {
+                    jsonProperties.get("SIG_KOR_NM").asString
+                } catch (e: Exception) {
+                    "NO NAME"
+                }
+            }
+
+            //Log.i(TAG, "name:$name")
+
+            var geoID = try {
+                jsonProperties.get("GEOID").asInt
+            } catch (e: Exception) {
+                0
+            }
+            if (geoID == 0) {
+                geoID = try {
+                    jsonProperties.get("SIG_CD").asInt
+                } catch (e: Exception) {
+                    0
+                }
+            }
+            //Log.i(TAG, "geoID:$geoID")
+
             val jsonGeometry = jsonFeature.asJsonObject.getAsJsonObject("geometry")
             val jsonCoordinates = jsonGeometry.getAsJsonArray("coordinates")
             val coordinates = ArrayList<ArrayList<PointF>>()
